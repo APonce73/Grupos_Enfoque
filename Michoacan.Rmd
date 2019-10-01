@@ -1,43 +1,176 @@
 ---
-title: "Grupos de Enfoque"
+title: "Grupo Enfoque"
 author: "Conabio"
 date: "9/26/2019"
 output:
    markdowntemplates::bulma
 ---
-![](pictures/portada_pgefAgro.jpg)
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, echo=FALSE, results="asis", fig.show='hold', out.width='70%', fig.align='center'}
+knitr::include_graphics("pictures/Logo-GEF.png")
 ```
-## Uricho
 
-La Comisión Nacional para el Conocimiento y Uso de la Diversidad ( [Conabio](https://www.gob.mx/conabio)), a través del proyecto [Agrobiodiversidad mexicana](https://www.biodiversidad.gob.mx/biodiversidad/agrobiodiversidad_pgef.html), esta cuantificando y valorando la gran diversidad agrícola del país. Una de las herramientas son los **Grupos de Enfoque** enfocados en la producción presente en comunidades.  
-*¿ Que es un grupo de Enfoque?*
-Los grupos de enfoque son intercambios de conocimiento sobre los agrícultores, hombres y mujeres, nos comparten sus conocimientos. Una de las comunidades es `Uricho`.  
-El taller se llevó acabo en `junio de 2019` con la participación de: *X hombres* y *X mujeres*. La actividad se dividió en cuatro partes:  
+```{r, echo=FALSE, results="asis", fig.show='hold', out.width='100%', fig.align='center'}
+knitr::include_graphics("pictures/portada_pgefAgro.jpg")
+```
 
-<div class="alert alert-info">
-  <ol>
-  <li> ¿Que es lo que producen? </li>
-  <li> ¿Que es lo que consumen? </li>
-  <li> ¿Que es lo que compran? </li>
-  <li> ¿Que es lo que venden?   </li>
-  </ol>
-</div>
+```{r, include=FALSE, warning=FALSE}
+library(tidyverse)
+library(readxl)
+library(ggwordcloud)
+library(here)
+library(ghibli)
 
-Los resultados son los siguientes:  
 
-## Hoja 2  
-```{r, out.width="450px", echo= FALSE}
+Estado1 <- c("Michoacán")
+Comunidad1 <- c("Pichataro")
+Mex <- read_xlsx("data_base/TablaFinal.xlsx", sheet = "TablaFinal", col_names = T) %>%
+    filter(Estado == Estado1) %>% 
+    filter(Comunidad == Comunidad1) %>% 
+    dplyr::mutate(valor = cuadrante_produccion) %>% 
+    dplyr::mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40))) %>% 
+    dplyr::mutate(valor = dplyr::recode(.x = valor,c(`1` = 9))) %>% 
+    dplyr::mutate(valor = dplyr::recode(.x = valor,c(`2` = 7))) %>% 
+    dplyr::mutate(valor = dplyr::recode(.x = valor,c(`3` = 6))) %>% 
+    dplyr::mutate(valor = dplyr::recode(.x = valor,c(`4` = 5))) %>%
+#    dplyr::mutate(Comunidad = dplyr::recode(.x = Comunidad, c("Pichataro" == #'Pichátaro'))) %>% 
+    filter(str_detect(Especie, "xx$", negate = TRUE)) %>% 
+    mutate(Especie = str_to_lower(Especie) )
+    
+  #  mutate(valor = round(log(valor),0))
+Mex_h <- Mex %>% 
+    filter(tipo_de_grupo == "Hombre")
+Mex_m <- Mex %>% 
+    filter(tipo_de_grupo == "Mujeres")
+    
+```
+
+`r Estado1`: `r Comunidad1`
+------
+
+La Comisión Nacional para el Conocimiento y Uso de la Diversidad ( [Conabio](https://www.gob.mx/conabio)), a través del proyecto [Agrobiodiversidad mexicana](https://www.biodiversidad.gob.mx/biodiversidad/agrobiodiversidad_pgef.html) y con la colaboración de la **UNAM** esta cuantificando y valorando la diversidad agrícola de `r Estado1` México. Una de las metodologías utilizadas son los **Grupos de Enfoque**.  
+\
+*¿ Que son los grupos de Enfoque?*  
+Los grupos de enfoque son discusiones con grupos separados, de hombres y mujeres, que nos permite tener un inventario de las plantas utiles para la alimentación. 
+En  `junio de 2019` en **`r Estado1`** en la comunidad de **`r Comunidad1`**, se llevó acabo el taller con la participación de *X hombres* y *X mujeres*. La actividad se dividió en cuatro partes:  
+* ¿Que es lo que producen?  
+* ¿Que es lo que consumen?  
+* ¿Que es lo que compran?  
+* ¿Que es lo que venden?  
+\
+Como resultado Se tuvo un total de **`r nrow(Mex)`** especies reportadas por su nombre común en **`r Comunidad1`**.   
+En el grupo de los *hombres* se tuvo un total de  **`r nrow(Mex_h)`** especies mencionadas En la siguiente figura las especies más valoradas se muestran con letras mas grandes:
+
+```{r, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+set.seed(42)
+wcloud_h <- Mex %>% 
+    filter(tipo_de_grupo == "Hombre")
+wcloud_m <- Mex %>% 
+    filter(tipo_de_grupo == "Mujeres")
+Figure1 <-  ggplot(wcloud_h, aes(label = Especie, size = valor,
+                           color = valor, angle = angle)) +
+    geom_text_wordcloud() +
+    theme_minimal() +
+    scale_colour_ghibli_c("MarnieMedium1", direction = -1)
+
+Figure2 <-  ggplot(wcloud_m, aes(label = Especie, size = valor,
+                           color = valor, angle = angle)) +
+    geom_text_wordcloud() +
+    theme_minimal() +
+    scale_colour_ghibli_c("MarnieMedium2", direction = -1)
+
+    #scale_color_discrete()
+    #scale_color_gradient(low = "darkred", high = "red")
+    
+#knitr::include_graphics(Figure1)
+```
+
+```{r, include=FALSE, warning=FALSE}
+#Para seleccionar las especies de cada grupo
+MexH_p <- Mex %>% 
+    select(tipo_de_grupo, Especie, cuadrante_produccion) %>% 
+    filter(cuadrante_produccion == 1) %>% 
+    filter(tipo_de_grupo == "Hombre")
+
+MexM_p <- Mex %>% 
+    select(tipo_de_grupo, Especie, cuadrante_produccion) %>% 
+    filter(cuadrante_produccion == 1) %>% 
+    filter(tipo_de_grupo == "Mujeres")
+
+MexH_c <- Mex %>% 
+    select(tipo_de_grupo, Especie, cuadrante_autoconsumo) %>% 
+    filter(cuadrante_autoconsumo == 1) %>% 
+    filter(tipo_de_grupo == "Hombre")
+
+MexM_c <- Mex %>% 
+    select(tipo_de_grupo, Especie, cuadrante_autoconsumo) %>% 
+    filter(cuadrante_autoconsumo == 1) %>% 
+    filter(tipo_de_grupo == "Mujeres")
+
+MexH_co <- Mex %>% 
+    select(tipo_de_grupo, Especie, cuadrante_compra) %>% 
+    filter(cuadrante_compra == 1) %>% 
+    filter(tipo_de_grupo == "Hombre")
+
+MexM_co <- Mex %>% 
+    select(tipo_de_grupo, Especie, cuadrante_compra) %>% 
+    filter(cuadrante_compra == 1) %>% 
+    filter(tipo_de_grupo == "Mujeres")
+
+MexH_ve <- Mex %>% 
+    select(tipo_de_grupo, Especie, cuadrante_mercado) %>% 
+    filter(cuadrante_mercado == 1) %>% 
+    filter(tipo_de_grupo == "Hombre")
+
+MexM_ve <- Mex %>% 
+    select(tipo_de_grupo, Especie, cuadrante_mercado) %>% 
+    filter(cuadrante_mercado == 1) %>% 
+    filter(tipo_de_grupo == "Mujeres")
+
+```
+
+```{r, warning=FALSE, echo=FALSE, fig.align='center', out.width='100%'}
+Figure1
+```
+Los cultivos más producidos en **`r Comunidad1`** para los hombres son **`r as.vector(MexH_p$Especie) `**, de estas las plantas que se utilizan para el autoconsumo son **`r as.vector(MexH_p$Especie) `**. Las plantas que se compran principalmente fueron: **`r as.vector(MexH_co$Especie) `**; y, Finalmente, las plantas que venden son: **`r as.vector(MexH_ve$Especie) `**.  
+
+Para el caso de las mujeres de **`r Comunidad1`** se tuvo un total de  **`r nrow(Mex_m)`** especies mostrada en la siguiente figura las especies, donde las más valoradas se muestran con letras mas grandes:
+
+```{r, warning=FALSE, echo=FALSE, fig.align='center', }
+Figure2
+```
+Los cultivos más producidos para las mujeres son **`r as.vector(MexM_p$Especie) `**, de estas las plantas que se utilizan para el autoconsumo son **`r as.vector(MexM_p$Especie) `**. Las plantas que se compran principalmente fueron: **`r as.vector(MexM_co$Especie) `**; y, Finalmente, las plantas que venden son: **`r as.vector(MexM_ve$Especie) `**.  
+
+\
+A continuación se presentan fotos del evento en **`r Comunidad1`**
+\
+\
+```{r, echo=FALSE, results="asis", fig.show='hold', out.width='50%'}
 dress <- c("pictures/")
-estado <- c("michoacan/")
-comunidad <- c("uricho/")
-foto <- c("foto1")
+estado <- Estado1
+comunidad <- Comunidad1
+foto1 <- c("foto1")
+foto2 <- c("foto2")
+foto3 <- c("foto3")
+foto4 <- c("foto4")
+foto5 <- c("foto5")
+foto6 <- c("foto6")
+
 tipo <- c(".jpg")
 
-TT <- paste(dress, estado, comunidad, foto, tipo, sep = "")
-knitr::include_graphics(TT)
-```
+TT1 <- paste(dress, estado, "/", comunidad,"/", foto1, tipo, sep = "")
+knitr::include_graphics(TT1)
+TT2 <- paste(dress, estado, "/", comunidad,"/", foto2, tipo, sep = "")
+knitr::include_graphics(TT2)
+TT3 <- paste(dress, estado, "/", comunidad,"/", foto3, tipo, sep = "")
+knitr::include_graphics(TT3)
+TT4 <- paste(dress, estado, "/", comunidad,"/", foto4, tipo, sep = "")
+knitr::include_graphics(TT4)
+TT5 <- paste(dress, estado, "/", comunidad,"/", foto5, tipo, sep = "")
+knitr::include_graphics(TT5)
+TT6 <- paste(dress, estado, "/", comunidad,"/", foto6, tipo, sep = "")
+knitr::include_graphics(TT6)
 
+```
 
 
