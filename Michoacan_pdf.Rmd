@@ -1,17 +1,6 @@
 ---
-title: "Grupos de enfoque"
-author: "Conabio"
-navlink: "[Conabio](https://www.gob.mx/conabio)"
-og:
-  type: "article"
-  title: "opengraph title"
-  url: "optional opengraph url"
-  image: "optional opengraph image link"
-footer:
-  - content: '[Agrobiodiversidad](https://www.biodiversidad.gob.mx/biodiversidad/agrobiodiversidad_pgef.html) <br/>'
-  - content: 'Copyright blah blah'
-date: "`r Sys.Date()`"
-output: markdowntemplates::prismskel
+output:
+  pdf_document: default
 ---
 ```{r, echo=FALSE, results="asis", fig.show='hold', out.width='70%', fig.align='center'}
 knitr::include_graphics("pictures/Logo-GEF.png")
@@ -20,7 +9,7 @@ knitr::include_graphics("pictures/Logo-GEF.png")
 #
 ```
 
-```{r, echo=FALSE, results="asis", fig.show='hold', out.width='100%', fig.align='center'}
+```{r, echo=FALSE, results="hide", fig.show='hold', out.width='100%', fig.align='center'}
 knitr::include_graphics("pictures/portada_pgefAgro.jpg")
 ```
 
@@ -173,12 +162,9 @@ TT3 <- paste(dress, estado, "/", comunidad,"/", foto3, tipo, sep = "")
 knitr::include_graphics(TT3)
 TT4 <- paste(dress, estado, "/", comunidad,"/", foto4, tipo, sep = "")
 knitr::include_graphics(TT4)
-TT5 <- paste(dress, estado, "/", comunidad,"/", foto5, tipo, sep = "")
-knitr::include_graphics(TT5)
-TT6 <- paste(dress, estado, "/", comunidad,"/", foto6, tipo, sep = "")
-knitr::include_graphics(TT6)
+#TT5 <- paste(dress, estado, "/", comunidad,"/", foto5, tipo, sep = "")
+#knitr::include_graphics(TT5)
+#TT6 <- paste(dress, estado, "/", comunidad,"/", foto6, tipo, sep = "")
+#knitr::include_graphics(TT6)
 
 ```
-
-
-
