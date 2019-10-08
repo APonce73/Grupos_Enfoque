@@ -32,24 +32,37 @@ library(here)
 library(ghibli)
 
 Estado1 <- c("Michoacán")
-Comunidad1 <- c("Tzirondaro")
+#Comunidad1 <- c("San Francisco Pichataro")
+#Comunidad1 <- c("San Andrés Tzirondaro")
+#Comunidad1 <- c("Nurio")
+Comunidad1 <- c("San Francisco Uricho")
+
 
 EstadoRoot <- c("Michoacan") #tuve que dividir esto por el error que me salía
-ComunidadRoot <- c("Tzirondaro") # de que no permitía acentos en los directorios :/
+#ComunidadRoot <- c("Pichataro") # de que no permitía acentos en los directorios :/
+#ComunidadRoot <- c("Tzirondaro") # de que no permitía acentos en los directorios :/
+#ComunidadRoot <- c("Nurio") # de que no permitía acentos en los directorios :/
+ComunidadRoot <- c("Uricho")
 
-Mex <- read_xlsx("data_base/TablaFinal.xlsx", sheet = "TablaFinal", col_names = T) %>%
-    filter(Estado == Estado1) %>% 
-    filter(Comunidad == Comunidad1) %>% 
-    dplyr::mutate(valor = cuadrante_produccion) %>% 
-    dplyr::mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40))) %>% 
-    dplyr::mutate(valor = dplyr::recode(.x = valor,c(`1` = 9))) %>% 
-    dplyr::mutate(valor = dplyr::recode(.x = valor,c(`2` = 7))) %>% 
-    dplyr::mutate(valor = dplyr::recode(.x = valor,c(`3` = 6))) %>% 
-    dplyr::mutate(valor = dplyr::recode(.x = valor,c(`4` = 5))) %>%
-#    dplyr::mutate(Comunidad = dplyr::recode(.x = Comunidad, c("Pichataro" == #'Pichátaro'))) %>% 
-    filter(str_detect(Especie, "xx$", negate = TRUE)) %>% 
-    mutate(Especie = str_to_lower(Especie) )
-    
+# La base de datos proviene de la limpieza de los datos del kobo en esta dirección
+# ~/Dropbox/GitHub/GEF-Agrobiodiversity/DataBase/TablaFinal.csv
+
+Mex <- read_csv("data_base/TablaFinal.csv", col_names = T)
+Mex <- Mex %>% 
+  group_by(tipo, Estado, Comunidad, tipo_de_grupo, Especie) %>%
+  summarise_all(sum) %>%
+  filter(Estado == Estado1) %>%
+  filter(Comunidad == Comunidad1) %>%
+  dplyr::mutate(valor = cuadrante_produccion) %>%
+  dplyr::mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40))) %>%
+  dplyr::mutate(valor = dplyr::recode(.x = valor, c(`1` = 9))) %>%
+  dplyr::mutate(valor = dplyr::recode(.x = valor, c(`2` = 7))) %>%
+  dplyr::mutate(valor = dplyr::recode(.x = valor, c(`3` = 6))) %>%
+  dplyr::mutate(valor = dplyr::recode(.x = valor, c(`4` = 5))) %>%
+  #    dplyr::mutate(Comunidad = dplyr::recode(.x = Comunidad, c("Pichataro" == #'Pichátaro'))) %>%
+  filter(str_detect(Especie, "xx$", negate = TRUE)) %>%
+  mutate(Especie = str_to_lower(Especie))
+
   #  mutate(valor = round(log(valor),0))
 Mex_h <- Mex %>% 
     filter(tipo_de_grupo == "Hombre")
@@ -81,62 +94,60 @@ Como parte de los resultados de **`r Comunidad1`** se tuvo un total de **`r nrow
 ```{r, include=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 set.seed(42)
-wcloud_h <- Mex %>% 
-    filter(tipo_de_grupo == "Hombre")
-wcloud_m <- Mex %>% 
-    filter(tipo_de_grupo == "Mujeres")
-Figure1 <-  ggplot(wcloud_h, aes(label = Especie, size = valor,
+wcloud_h <- Mex %>%
+  filter(tipo_de_grupo == "Hombre") %>% 
+  filter(Estado == Estado1) %>% 
+  filter(Comunidad == Comunidad1)
+
+  
+#wcloud_m <- Mex %>% 
+#    filter(tipo_de_grupo == "Mujeres") %>% 
+#  filter(Estado == Estado1) %>% 
+#  filter(Comunidad == Comunidad1)
+Figure1 <-  ggplot(Mex_h, aes(label = Especie, size = valor,
                            color = valor, angle = angle)) +
     geom_text_wordcloud() +
     theme_minimal() +
     scale_colour_ghibli_c("MarnieMedium1", direction = -1)
 
-Figure2 <-  ggplot(wcloud_m, aes(label = Especie, size = valor,
+Figure2 <-  ggplot(Mex_m, aes(label = Especie, size = valor,
                            color = valor, angle = angle)) +
     geom_text_wordcloud() +
     theme_minimal() +
     scale_colour_ghibli_c("MarnieMedium2", direction = -1)
 
 #Para seleccionar las especies de cada grupo
-MexH_p <- Mex %>% 
+MexH_p <- Mex_h %>% 
     select(tipo_de_grupo, Especie, cuadrante_produccion) %>% 
-    filter(cuadrante_produccion == 1) %>% 
-    filter(tipo_de_grupo == "Hombre")
+    filter(cuadrante_produccion == 1) 
 
-MexM_p <- Mex %>% 
+MexM_p <- Mex_m %>% 
     select(tipo_de_grupo, Especie, cuadrante_produccion) %>% 
-    filter(cuadrante_produccion == 1) %>% 
-    filter(tipo_de_grupo == "Mujeres")
+    filter(cuadrante_produccion == 1) 
 
-MexH_c <- Mex %>% 
+MexH_c <- Mex_h %>% 
     select(tipo_de_grupo, Especie, cuadrante_autoconsumo) %>% 
-    filter(cuadrante_autoconsumo == 1) %>% 
-    filter(tipo_de_grupo == "Hombre")
+    filter(cuadrante_autoconsumo == 1)
 
-MexM_c <- Mex %>% 
+MexM_c <- Mex_m %>% 
     select(tipo_de_grupo, Especie, cuadrante_autoconsumo) %>% 
-    filter(cuadrante_autoconsumo == 1) %>% 
-    filter(tipo_de_grupo == "Mujeres")
+    filter(cuadrante_autoconsumo == 1)
 
-MexH_co <- Mex %>% 
+MexH_co <- Mex_h %>% 
     select(tipo_de_grupo, Especie, cuadrante_compra) %>% 
-    filter(cuadrante_compra == 1) %>% 
-    filter(tipo_de_grupo == "Hombre")
+    filter(cuadrante_compra == 1)
 
-MexM_co <- Mex %>% 
+MexM_co <- Mex_m %>% 
     select(tipo_de_grupo, Especie, cuadrante_compra) %>% 
-    filter(cuadrante_compra == 1) %>% 
-    filter(tipo_de_grupo == "Mujeres")
+    filter(cuadrante_compra == 1) 
 
-MexH_ve <- Mex %>% 
+MexH_ve <- Mex_h %>% 
     select(tipo_de_grupo, Especie, cuadrante_mercado) %>% 
-    filter(cuadrante_mercado == 1) %>% 
-    filter(tipo_de_grupo == "Hombre")
+    filter(cuadrante_mercado == 1) 
 
-MexM_ve <- Mex %>% 
+MexM_ve <- Mex_m %>% 
     select(tipo_de_grupo, Especie, cuadrante_mercado) %>% 
-    filter(cuadrante_mercado == 1) %>% 
-    filter(tipo_de_grupo == "Mujeres")
+    filter(cuadrante_mercado == 1)
 
 ```
 ```{r, warning=FALSE, echo=FALSE, fig.align='center', out.width='70%'}
@@ -160,8 +171,8 @@ foto1 <- c("foto1")
 foto2 <- c("foto2")
 foto3 <- c("foto3")
 foto4 <- c("foto4")
-#foto5 <- c("foto5")
-#foto6 <- c("foto6")
+foto5 <- c("foto5")
+foto6 <- c("foto6")
 
 tipo <- c(".jpg")
 
@@ -179,6 +190,5 @@ TT6 <- paste(dress, estado, "/", comunidad,"/", foto6, tipo, sep = "")
 knitr::include_graphics(TT6)
 
 ```
-
 
 
