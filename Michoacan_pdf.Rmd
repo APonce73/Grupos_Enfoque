@@ -2,8 +2,8 @@
 output:
   pdf_document: default
 ---
-```{r, echo=FALSE, results="asis", fig.show='hold', out.width='70%', fig.align='center'}
-knitr::include_graphics("pictures/Logo-GEF.png")
+```{r, echo=FALSE, results="asis", fig.show='hold', out.width='100%', fig.align='center'}
+knitr::include_graphics("pictures/Logo-GEF1.png")
 #output:
 #   markdowntemplates::bulma
 #
@@ -22,19 +22,31 @@ library(ghibli)
 
 Estado1 <- c("Michoacán")
 #Comunidad1 <- c("San Francisco Pichataro")
-Comunidad1 <- c("San Andrés Tzirondaro")
+#Comunidad1 <- c("San Andrés Tzirondaro")
 #Comunidad1 <- c("Nurio")
-#Comunidad1 <- c("San Francisco Uricho")
+Comunidad1 <- c("San Francisco Uricho")
 
+if (Comunidad1 == 'San Francisco Uricho') {
+  ComunidadRoot = c('Uricho')
+} else if (Comunidad1 == 'Nurio') {
+  ComunidadRoot = c('Nurio')
+} else if (Comunidad1 == 'San Francisco Pichataro') {
+  ComunidadRoot = c('Pichataro')
+} else if (Comunidad1 == 'San Andrés Tzirondaro') {
+  ComunidadRoot = c('Tzirondaro')
+}
 
-EstadoRoot <- c("Michoacan") #tuve que dividir esto por el error que me salía
-#ComunidadRoot <- c("Pichataro") # de que no permitía acentos en los directorios :/
-ComunidadRoot <- c("Tzirondaro") # de que no permitía acentos en los directorios :/
-#ComunidadRoot <- c("Nurio") # de que no permitía acentos en los directorios :/
-#ComunidadRoot <- c("Uricho")
+if (Estado1 == 'Michoacán') {
+  EstadoRoot = c('Michoacan') }
 
-# La base de datos proviene de la limpieza de los datos del kobo en esta dirección
-# ~/Dropbox/GitHub/GEF-Agrobiodiversity/DataBase/TablaFinal.csv
+#EstadoRoot <- c("Michoacan") #tuve que dividir esto por el error que me salía
+##ComunidadRoot <- c("Pichataro") # de que no permitía acentos en los directorios :/
+#ComunidadRoot <- c("Tzirondaro") # de que no permitía acentos en los directorios :/
+##ComunidadRoot <- c("Nurio") # de que no permitía acentos en los directorios :/
+##ComunidadRoot <- c("Uricho")
+#
+## La base de datos proviene de la limpieza de los datos del kobo en esta dirección
+## ~/Dropbox/GitHub/GEF-Agrobiodiversity/DataBase/TablaFinal.csv
 
 
 if (ComunidadRoot == 'Uricho') {
@@ -77,11 +89,12 @@ Mex <- Mex %>%
   filter(Estado == Estado1) %>%
   filter(Comunidad == Comunidad1) %>%
   dplyr::mutate(valor = cuadrante_produccion) %>%
-  dplyr::mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(70, 30))) %>%
-  dplyr::mutate(valor = dplyr::recode(.x = valor, c(`1` = 9))) %>%
+  dplyr::mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40))) %>%
+  dplyr::mutate(valor = dplyr::recode(.x = valor, c(`1` = 12))) %>%
   dplyr::mutate(valor = dplyr::recode(.x = valor, c(`2` = 7))) %>%
   dplyr::mutate(valor = dplyr::recode(.x = valor, c(`3` = 6))) %>%
   dplyr::mutate(valor = dplyr::recode(.x = valor, c(`4` = 5))) %>%
+  #filter(valor > 1) %>% 
   #    dplyr::mutate(Comunidad = dplyr::recode(.x = Comunidad, c("Pichataro" == #'Pichátaro'))) %>%
   filter(str_detect(Especie, "xx$", negate = TRUE)) %>%
   mutate(Especie = str_to_lower(Especie))
@@ -107,16 +120,18 @@ Grupos de Enfoque en `r Comunidad1`, `r Estado1`
 La Comisión Nacional para el Conocimiento y Uso de la Biodiversidad ([Conabio](https://www.gob.mx/conabio)), a través del proyecto [Agrobiodiversidad mexicana](https://www.biodiversidad.gob.mx/biodiversidad/agrobiodiversidad_pgef.html) y con la colaboración de la UNAM esta cuantificando y valorando la diversidad agrícola de **`r Estado1`**. Para cumplir con este objetivo se están llevando acabo distintas estrategias, entre las que se encuentran los **Grupos de Enfoque**.  
 \
 *¿Que son los Grupos de Enfoque?*  
-Los *Grupos de Enfoque* son reuniones entre agricultores, hombres y mujeres por separado, donde se discute y conversa  sobre un tema de interés, en este caso sobre **las plantas útiles para la alimentación** de una localidad o comunidad, basado en cuatro preguntas:  
-1. ¿Que es lo que producen?  
-2. ¿Que es lo que consumen?  
-3. ¿Que es lo que compran?  
-4. ¿Que es lo que venden?  
-En cada pregunta las planta que son mencionadas se valoran de mayor importancia a menor importancia.  
-\
-En `r mes_num` del 2019 en la comunidad de **`r Comunidad1`**, se llevó acabo el *Grupo de Enfoque* con la participación de *`r hombres_num` hombres* y *`r mujeres_num` mujeres*.  
-\
-Como parte de los resultados de **`r Comunidad1`** se tuvo un total de **`r nrow(Mex_T)`** especies reportadas por su nombre común. En el grupo de los *hombres* se tuvo un total de  **`r nrow(Mex_h)`** especies que se muestran en la siguiente figura, donde las de mayor importancia tienen letras más grandes:
+Los *Grupos de Enfoque* son reuniones entre agricultores, hombres y mujeres, donde se discute y conversa  sobre un tema de interés, en este caso sobre **las plantas usadas para la alimentación** de una localidad o comunidad. La metodología se basa en cuatro preguntas:  
+1. ¿Cuales son las plantas, para la alimentación, que se cultivan o recolectan en su comunidad?  
+2. De estas plantas, ¿cuales son consumidas en la comunidad?  
+3. De estas plantas, ¿cuales se compran en la comunidad?  
+4. De estas plantas, ¿cuales se venden en la comunidad?  
+A cada pregunta las planta se van colocando en los diferentes cuadrantes de acuerdo a su área de siembra o recolecta y a su uso por los habitantes de la comunidada como se muestra en la siguiente figura:  
+```{r, echo=FALSE, results="asis", fig.show='hold', out.width='35%', fig.align='center'}
+knitr::include_graphics("pictures/cuadrantes.png")
+```
+En `r mes_num` del 2019 en la comunidad de `r Comunidad1`, se llevó acabo el *Grupo de Enfoque* con la participación de `r hombres_num` hombres y `r mujeres_num` mujeres.  
+Como parte de los resultados de `r Comunidad1` se tuvo un total de `r nrow(Mex_T)` especies reportadas por su nombre común. En el grupo de los hombres se tuvo un total de  `r nrow(Mex_h)` especies que se muestran en la siguiente nube de palabras, donde las plantas o cultivos con letras más grandes son aquellas que fueron sembradas o recolectadas en grandes extensiones por muchos agricultores:
+
 ```{r, include=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 set.seed(42)
@@ -125,20 +140,15 @@ wcloud_h <- Mex %>%
   filter(Estado == Estado1) %>% 
   filter(Comunidad == Comunidad1)
 
-  
-#wcloud_m <- Mex %>% 
-#    filter(tipo_de_grupo == "Mujeres") %>% 
-#  filter(Estado == Estado1) %>% 
-#  filter(Comunidad == Comunidad1)
 Figure1 <-  ggplot(Mex_h, aes(label = Especie, size = valor,
                            color = valor, angle = angle)) +
-    geom_text_wordcloud() +
+    geom_text_wordcloud_area() +
     theme_minimal() +
     scale_colour_ghibli_c("MarnieMedium1", direction = -1)
 
 Figure2 <-  ggplot(Mex_m, aes(label = Especie, size = valor,
                            color = valor, angle = angle)) +
-    geom_text_wordcloud() +
+    geom_text_wordcloud_area() +
     theme_minimal() +
     scale_colour_ghibli_c("MarnieMedium2", direction = -1)
 
@@ -175,20 +185,27 @@ MexM_ve <- Mex_m %>%
     select(tipo_de_grupo, Especie, cuadrante_mercado) %>% 
     filter(cuadrante_mercado == 1)
 
+Mex_p4 <- Mex %>%
+  ungroup() %>%
+  select(Especie, tipo_de_grupo, cuadrante_produccion) %>%
+  tibble::rowid_to_column() %>% 
+  spread(tipo_de_grupo, cuadrante_produccion, fill = NA)
+
+#    filter(cuadrante_autoconsumo == 4) %>% 
+#  distinct()
+  
+
 ```
-```{r, warning=FALSE, echo=FALSE, fig.align='center', out.width='75%'}
+```{r, warning=FALSE, echo=FALSE, fig.align='center', out.width='80%'}
 Figure1
 ```
-Respondiendo a las cuatro preguntas mencionadas previamente, en el grupo de los *hombres* las plantas o cultivos más producidos fueron **`r as.vector(MexH_p$Especie) `**; las más utilizados en el autoconsumo (o consumo de sus animales) fueron **`r as.vector(MexH_p$Especie) `**; las que compran principalmente fueron **`r as.vector(MexH_co$Especie) `**; y, finalmente, las que más venden fueron **`r as.vector(MexH_ve$Especie) `**.  
-\
-En el grupo de las *mujeres* se tuvo un total de  **`r nrow(Mex_m)`** especies que se muestran en la siguiente figura las más valoradas con letras mas grandes:
-```{r, warning=FALSE, echo=FALSE, fig.align='center', out.width='75%'}
+Respondiendo a las cuatro preguntas mencionadas previamente, en el grupo de los *hombres* las plantas o cultivos más producidos fueron `r as.vector(MexH_p$Especie) `; las más utilizados en el autoconsumo (o consumo de sus animales) fueron `r as.vector(MexH_p$Especie) `; las que se compran principalmente fueron `r as.vector(MexH_co$Especie) `; y, finalmente, las que se venden más fueron `r as.vector(MexH_ve$Especie) `.  
+En el grupo de las mujeres se tuvo un total de  `r nrow(Mex_m)` especies que se muestran en la siguiente nube de palabras, donde las plantas o cultivos con letras más grandes son aquellas que fueron sembradas o recolectadas en grandes extensiones por muchos agricultores:
+```{r, warning=FALSE, echo=FALSE, fig.align='center', out.width='80%'}
 Figure2
 ```
-Respondiendo a las cuatro preguntas mencionadas previamente, en el grupo de las *mujeres* las plantas o cultivos más producidos fueron **`r as.vector(MexM_p$Especie) `**; las más utilizados en el autoconsumo (o consumo de sus animales) fueron **`r as.vector(MexM_p$Especie) `**; las que compran principalmente fueron **`r as.vector(MexM_co$Especie) `**; y, finalmente, las que más venden fueron **`r as.vector(MexM_ve$Especie) `**.  
-\
+en cuanto a las preguntas mencionadas previamente, en el grupo de las *mujeres* las plantas o cultivos más producidos fueron `r as.vector(MexM_p$Especie) `; las más utilizados en el autoconsumo (o consumo de sus animales) fueron `r as.vector(MexM_p$Especie) `; las que se compran principalmente fueron `r as.vector(MexM_co$Especie) `; y, finalmente, las que se venden más fueron `r as.vector(MexM_ve$Especie) `.  
 Finalmente, se muestran algunas fotos del evento en **`r Comunidad1`**
-\
 ```{r, echo=FALSE, results="asis", fig.show='hold', out.width='50%'}
 dress <- c("pictures/")
 estado <- EstadoRoot
